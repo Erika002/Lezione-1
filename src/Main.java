@@ -1,92 +1,122 @@
+import Controller.EagleController;
+import Controller.LeonController;
+import Controller.TigerController;
 import Controller.ZooController;
-import Entity.Zoo;
 
 import java.text.ParseException;
 import java.util.Scanner;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) throws ParseException {
-        Zoo zoo = new Zoo();
-
-        String inserisci = "";
-        ZooController controller = new ZooController(zoo);
-
         Scanner scanner = new Scanner(System.in);
+        ZooController zooController = new ZooController();
+        LeonController leonController = LeonController.getInstance();
+        TigerController tigerController = TigerController.getInstance();
+        EagleController eagleController = EagleController.getInstance();
+
+        String insert = "";
 
         do {
-            System.out.println(" inserisci un animale: ");
-            controller.inserisciAnimale();
-            System.out.println(" per inserire un nuovo animale digita + ");
-            System.out.println(" per proseguire digita - ");
-            inserisci = scanner.nextLine();
+            System.out.println("Choose the new animal to insert:");
+            System.out.println("1. Leon");
+            System.out.println("2. Tiger");
+            System.out.println("3. Eagle");
 
+            int animalChoice = scanner.nextInt();
+            scanner.nextLine();
 
-        } while (!inserisci.equals("-"));
-
-
-        int scelta;
-        int sceltaSpecie = 0;
-        String specie = " ";
-
-        if (inserisci.equals("-")) {
-            System.out.println(" Scegli una specie per la tua ricerca ");
-            System.out.println("1. Leone");
-            System.out.println("2. Tigre");
-            System.out.println("3. Aquila");
-            sceltaSpecie = scanner.nextInt();
-
-            switch (sceltaSpecie) {
+            switch (animalChoice) {
                 case 1:
-                    specie = "Leone";
+                    zooController.insertAnimal(scanner, "Leon");
                     break;
                 case 2:
-                    specie = "Tigre";
+                    zooController.insertAnimal(scanner, "Tiger");
                     break;
                 case 3:
-                    specie = "Aquila";
+                    zooController.insertAnimal(scanner, "Eagle");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Try again.");
                     break;
             }
 
-        if(sceltaSpecie != 0) {
-            System.out.println("lista di tutti gli animali presenti nello zoo \n" + zoo.toString());
+            System.out.println("To insert a new animal, type '+'. Otherwise, type '-':");
+            insert = scanner.nextLine();
+        } while (!insert.equals("-"));
+
+        if (insert.equals("-")) {
+            System.out.println("Choose a species for your search:");
+            System.out.println("1. Leon");
+            System.out.println("2. Tiger");
+            System.out.println("3. Eagle");
+
+            int speciesChoice = scanner.nextInt();
+            scanner.nextLine();
+
+            String species = "";
+            switch (speciesChoice) {
+                case 1:
+                    species = "Leon";
+                    break;
+                case 2:
+                    species = "Tiger";
+                    break;
+                case 3:
+                    species = "Eagle";
+                    break;
+                default:
+                    System.out.println("Invalid choice. Exiting the program.");
+                    return;
+            }
+            int choice;
             do {
-                System.out.println("Scegli un'opzione:");
-                System.out.println("1. Trova l'esemplare più alto e più basso tra " + specie);
-                System.out.println("2. Trova l'esemplare più pesante e più leggero tra " + specie);
-                if (specie.equalsIgnoreCase("leone") || specie.equalsIgnoreCase("tigre")) {
-                    System.out.println("3. Trova l'esemplare con la coda più lunga");
-                } else if (specie.equalsIgnoreCase("aquila")) {
-                    System.out.println("3. Trova l'esemplare con l'apertura alare più larga");
+                System.out.println("Choose an option:");
+                System.out.println("1. Find the tallest specimen among" + species);
+                System.out.println("2. Find the lowest specimen among " + species);
+                System.out.println("3. Find the heaviest specimen among" + species);
+                System.out.println("4. Find the lightest specimen among " + species);
+                if (species.equalsIgnoreCase("leon") || species.equalsIgnoreCase("tiger")) {
+                    System.out.println("5. Find the specimen with the longest tail");
+                } else if (species.equalsIgnoreCase("eagle")) {
+                    System.out.println("5. Find the specimen with the largest wingspan");
                 }
-                System.out.println("0. Esci");
+                System.out.println("0. Exit");
 
-                scelta = scanner.nextInt();
+                choice = scanner.nextInt();
+                scanner.nextLine();
 
-
-                switch (scelta) {
+                switch (choice) {
                     case 1:
-                        controller.trovaEsemplareAltoEBassoPerSpecie(specie);
+                        zooController.findTallerSpecimen(species);
                         break;
                     case 2:
-                        controller.trovaEsemplarePesanteELeggeroPerSpecie(specie);
+                        zooController.findLowerSpecimen(species);
                         break;
                     case 3:
-                        controller.trovaEsemplareMisuraLunga(specie);
+                        zooController.findHeavierSpecimen(species);
+                        break;
+                    case 4:
+                        zooController.findLighterSpecimen(species);
+                        break;
+                    case 5:
+                        if (species.equalsIgnoreCase("leon")) {
+                            leonController.longerTail();
+                        } else if (species.equalsIgnoreCase("tiger")) {
+                            tigerController.longerTail();
+                        } else if (species.equalsIgnoreCase("eagle")) {
+                            eagleController.widerWingWidth();
+                        }
                         break;
                     case 0:
-                        System.out.println("Uscita dal programma.");
+                        System.out.println("Exiting the program.");
                         break;
                     default:
-                        System.out.println("Scelta non valida. Riprova.");
+                        System.out.println("Invalid choice. Try again.");
+                        break;
                 }
-            } while (scelta != 0);
+            } while (choice != 0);
         }
-        }
 
-            scanner.close();
-
-
+        scanner.close();
     }
 }

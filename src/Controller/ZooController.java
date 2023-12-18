@@ -1,144 +1,172 @@
 package Controller;
-import Entity.Animale;
-import Entity.Zoo;
+import Entity.Animal;
+import Entity.Eagle;
+import Entity.Leon;
+import Entity.Tiger;
+
+
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Scanner;
 
 public class ZooController {
-    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-    private Zoo zoo;
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-    public ZooController(Zoo zoo) {
-        this.zoo = zoo;
+    LeonController leonController = LeonController.getInstance();
+    TigerController tigerController = TigerController.getInstance();
+    EagleController eagleController = EagleController.getInstance();
+    private List<Animal> animals;
+
+    public ZooController() {
+        this.animals = new ArrayList<>();
     }
 
-    public void inserisciAnimale() throws ParseException {
-        Scanner scanner = new Scanner(System.in);
+    public List<Animal> getAnimals() {
+        return animals;
+    }
 
+    public void addAnimals(Animal animal) {
+        animals.add(animal);
+    }
+    private List<Animal> getAnimalsBySpecies(String species) {
+        List<Animal> animalSpecies = new ArrayList<>();
 
-        System.out.println("Seleziona la specie:");
-        System.out.println("1. Leone");
-        System.out.println("2. Tigre");
-        System.out.println("3. Aquila");
+        for (Animal animal : animals) {
+            if (animal.getSpecies().equalsIgnoreCase(species)) {
+                animalSpecies.add(animal);
+            }
+        }
+        return animalSpecies;
+    }
 
-        int sceltaSpecie = scanner.nextInt();
+    public void insertAnimal(Scanner scanner, String species) throws ParseException {
+        System.out.println("Enter the details of the new one " + species + ":");
 
-        String specie;
-        switch (sceltaSpecie) {
-            case 1:
-                specie = "Leone";
+        System.out.print("name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Favorite food: ");
+        String favoriteFood = scanner.nextLine();
+
+        System.out.print("Age: ");
+        int age = scanner.nextInt();
+
+        System.out.print("Weight: ");
+        double weight = scanner.nextDouble();
+
+        System.out.print("Height: ");
+        double height = scanner.nextDouble();
+        scanner.nextLine();
+
+        System.out.println("Date of entry into the zoo (format dd-MM-yyyy): ");
+        String date = scanner.nextLine();
+        System.out.println(date + "date");
+        LocalDate entryDate = LocalDate.parse(date, dateFormatter);
+
+        Animal newAnimal = null;
+        switch (species.toLowerCase()) {
+            case "leon":
+                System.out.print("Length thing: ");
+                double lionTailLength = scanner.nextDouble();
+                scanner.nextLine();
+                newAnimal = new Leon(species, name, favoriteFood, age, entryDate, weight, height, lionTailLength);
+                Leon nuovoLeon = new Leon(species, name, favoriteFood, age, entryDate, weight, height, lionTailLength);
+                leonController.addLeons(nuovoLeon);
                 break;
-            case 2:
-                specie = "Tigre";
+            case "tiger":
+                System.out.print("Length thing: ");
+                double tigerTailLength = scanner.nextDouble();
+                scanner.nextDouble();
+                newAnimal = new Tiger(species, name, favoriteFood, age, entryDate, weight, height, tigerTailLength);
+                Tiger nuovaTiger = new Tiger(species, name, favoriteFood, age, entryDate, weight, height, tigerTailLength);
+                tigerController.addTigers(nuovaTiger);
                 break;
-            case 3:
-                specie = "Aquila";
+            case "eagle":
+                System.out.print("Wing width: ");
+                double eagleWingWidth = scanner.nextDouble();
+                scanner.nextDouble();
+                newAnimal = new Eagle(species, name, favoriteFood, age, entryDate, weight, height, eagleWingWidth);
+                Eagle nuovaEagle = new Eagle(species, name, favoriteFood, age, entryDate, weight, height, eagleWingWidth);
+                eagleController.addEagle(nuovaEagle);
                 break;
             default:
-                System.out.println("Scelta non valida. Specie impostata su valore predefinito: Leone");
-                specie = "Leone";
-        }
-        System.out.println("Inserisci i dettagli del nuovo animale:");
-
-
-        System.out.print("Nome: ");
-        String nome = scanner.nextLine();
-
-        System.out.print("Cibo preferito: ");
-        String ciboPreferito = scanner.nextLine();
-
-        System.out.print("Età: ");
-        int eta = scanner.nextInt();
-
-        System.out.print("Peso: ");
-        double peso = scanner.nextDouble();
-
-        System.out.print("Altezza: ");
-        double altezza = scanner.nextDouble();
-
-        System.out.println("Data di ingresso nello zoo: ");
-        String data = scanner.nextLine();
-        Date dataIngresso = null;
-        dataIngresso = simpleDateFormat.parse(data);
-
-        double misura = 0.0;
-        if(sceltaSpecie != 3) {
-            System.out.print("Lunghezza coda: ");
-             misura = scanner.nextDouble();
-        } else {
-            System.out.print("Apertura alare : ");
-             misura = scanner.nextDouble();
+                System.out.println("Species not supported.");
+                return;
         }
 
-        Animale nuovoAnimale = new Animale(specie, nome, ciboPreferito, eta, dataIngresso, peso, altezza, misura);
+        addAnimals(newAnimal);
+    }
 
-        zoo.aggiungiAnimale(nuovoAnimale);
+    public void findTallerSpecimen(String species) {
+        List<Animal> animalSpecies = getAnimalsBySpecies(species);
+
+        if (animalSpecies.isEmpty()) {
+            System.out.println("No " + species + " present in the zoo.");
+            return;
+        }
+
+        Animal specimentTallest = animalSpecies.stream()
+                .max(Comparator.comparingDouble(Animal::getHeight))
+                .orElse(null);
+
+        System.out.println("the " + species + "tallest is" + specimentTallest.getName() +
+                " with height " + specimentTallest.getHeight() + "cm");
+    }
+
+    public void findLowerSpecimen(String species) {
+        List<Animal> animalSpecies = getAnimalsBySpecies(species);
+
+        if (animalSpecies.isEmpty()) {
+            System.out.println("No " + species + " present in the zoo.");
+            return;
+        }
+
+        Animal specimentLower = animalSpecies.stream()
+                .min(Comparator.comparingDouble(Animal::getHeight))
+                .orElse(null);
+
+        System.out.println("The " + species + " lower is" + specimentLower.getName() +
+                "  with height " + specimentLower.getHeight() + "cm");
+    }
+
+    public void findHeavierSpecimen(String species) {
+        List<Animal> animalSpecies = getAnimalsBySpecies(species);
+
+        if (animalSpecies.isEmpty()) {
+            System.out.println("No " + species + " present in the zoo.");
+            return;
+        }
+
+        Animal specimentHeavier = animalSpecies.stream()
+                .max(Comparator.comparingDouble(Animal::getWeight))
+                .orElse(null);
+
+        System.out.println("The " + species + " heavier is " + specimentHeavier.getName() +
+                " with weight" + specimentHeavier.getWeight() + "kg");
+    }
+
+    public void findLighterSpecimen(String species) {
+        List<Animal> animalSpecies = getAnimalsBySpecies(species);
+
+        if (animalSpecies.isEmpty()) {
+            System.out.println("No " + species + " present in the zoo.");
+            return;
+        }
+
+        Animal specimentLighter = animalSpecies.stream()
+                .min(Comparator.comparingDouble(Animal::getWeight))
+                .orElse(null);
+
+        System.out.println("Il " + species + " lighter is " + specimentLighter.getName() +
+                " with weight " + specimentLighter.getWeight() + "kg");
     }
 
 
-    public void trovaEsemplareAltoEBassoPerSpecie(String specie) {
-        List<Animale> animaliSpecie = zoo.getAnimaliBySpecie(specie);
-
-        if (animaliSpecie.isEmpty()) {
-            System.out.println("Nessun animale di specie " + specie + " presente nello zoo.");
-        }
-
-        Animale animalePiuAlto = animaliSpecie.stream()
-                .max(Comparator.comparingDouble(Animale::getAltezza))
-                .orElse(null);
-
-        Animale animalePiuBasso = animaliSpecie.stream()
-                .min(Comparator.comparingDouble(Animale::getAltezza))
-                .orElse(null);
-
-        System.out.println("l' animale più alto della specie " + specie + "è : " + animalePiuAlto.getNome() +
-                    " con altezza " + animalePiuAlto.getAltezza() + "cm");
-        System.out.println("l' animale più basso della specie " + specie + "è : " + animalePiuBasso.getNome() +
-                " con altezza " + animalePiuBasso.getAltezza() + "cm");
-
-    }
 
 
-    public void trovaEsemplarePesanteELeggeroPerSpecie(String specie) {
-        List<Animale> animaliSpecie = zoo.getAnimaliBySpecie(specie);
-
-        if (animaliSpecie.isEmpty()) {
-            System.out.println("Nessun animale di specie " + specie + " presente nello zoo.");
-        }
-
-        Animale animalePiuPesante = animaliSpecie.stream()
-                .max(Comparator.comparingDouble(Animale::getPeso))
-                .orElse(null);
-
-        Animale animalePiuLeggero = animaliSpecie.stream()
-                .min(Comparator.comparingDouble(Animale::getPeso))
-                .orElse(null);
-
-        System.out.println("l' animale più pesante della specie " + specie + " è : " + animalePiuPesante.getNome() +
-                " con peso " + animalePiuPesante.getPeso() + "kg" );
-        System.out.println("l' animale più leggero della specie " + specie + " è : " + animalePiuLeggero.getNome() +
-                " con peso " + animalePiuLeggero.getPeso() + "kg");
-    }
-
-    public void trovaEsemplareMisuraLunga(String specie) {
-        List<Animale> animaliSpecie = zoo.getAnimaliBySpecie(specie);
-
-        if (animaliSpecie.isEmpty()) {
-            System.out.println("Nessun animale di specie " + specie + " presente nello zoo.");
-        }
-        Animale animaleMisuraAmpia = animaliSpecie.stream()
-                .max(Comparator.comparingDouble(Animale::getMisura))
-                .orElse(null);
-        if(!specie.equals( "aquila")) {
-            System.out.println("l' animale con la coda più lunga della specie " + specie + " è : " + animaleMisuraAmpia.getNome() +
-                    " con misura " + animaleMisuraAmpia.getMisura() + "cm");
-        } else {
-            System.out.println("l' animale con la larghezza alare più ampia della specie " + specie + " è : " + animaleMisuraAmpia.getNome() +
-                    " con misura " + animaleMisuraAmpia.getMisura() + "cm");
-        }
-
-    }
 
 }
-

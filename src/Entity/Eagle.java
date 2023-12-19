@@ -1,11 +1,12 @@
 package Entity;
 
+import Interface.IAnimalWithWings;
+
 import java.time.LocalDate;
 
-public class Eagle extends Animal {
+public class Eagle extends Animal implements IAnimalWithWings {
     private double wingWidth;
 
-    public Eagle() {}
 
     public Eagle(String species, String name, String favoriteFood, int age, LocalDate entryDate, double weight, double height, double wingWidth) {
         super(species, name, favoriteFood, age, entryDate, weight, height);
@@ -20,7 +21,7 @@ public class Eagle extends Animal {
         this.wingWidth = wingWidth;
     }
 
-    @Override
+     @Override
     public String toString() {
         return "Animal{" +
                 "species='" + getSpecies() + '\'' +
@@ -32,5 +33,10 @@ public class Eagle extends Animal {
                 ", height=" + getHeight() +
                 ", wing width=" + wingWidth +
                 '}';
+    }
+
+    @Override
+    public boolean hasWings() {
+        return true;
     }
 }

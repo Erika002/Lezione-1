@@ -1,7 +1,7 @@
 package Controller;
 import Entity.Animal;
 import Entity.Eagle;
-import Entity.Leon;
+import Entity.Lion;
 import Entity.Tiger;
 
 
@@ -14,27 +14,53 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ZooController {
+
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-    LeonController leonController = LeonController.getInstance();
-    TigerController tigerController = TigerController.getInstance();
-    EagleController eagleController = EagleController.getInstance();
+    private List<Eagle> eagles;
+    private List<Lion> lions;
+    private List<Tiger> tigers;
     private List<Animal> animals;
+
 
     public ZooController() {
         this.animals = new ArrayList<>();
+        this.eagles = new ArrayList<>();
+        this.lions = new ArrayList<>();
+        this.tigers = new ArrayList<>();
     }
 
     public List<Animal> getAnimals() {
         return animals;
     }
+    public List<Eagle> getEagles() {
+        return eagles;
+    }
+    public List<Tiger> getTigers() {
+        return tigers;
+    }
+    public List<Lion> getLions() {
+        return lions;
+    }
+    public void addEagle(Eagle eagle) {
+        eagles.add(eagle);
+    }
+    public void addTiger(Tiger tiger) {
+        tigers.add(tiger);
+    }
+    public void addLion(Lion lion) {
+        lions.add(lion);
+    }
+
+
+
+
 
     public void addAnimals(Animal animal) {
         animals.add(animal);
     }
-    private List<Animal> getAnimalsBySpecies(String species) {
+    public List<Animal> getAnimalsBySpecies(String species) {
         List<Animal> animalSpecies = new ArrayList<>();
-
         for (Animal animal : animals) {
             if (animal.getSpecies().equalsIgnoreCase(species)) {
                 animalSpecies.add(animal);
@@ -67,38 +93,34 @@ public class ZooController {
         System.out.println(date + "date");
         LocalDate entryDate = LocalDate.parse(date, dateFormatter);
 
-        Animal newAnimal = null;
         switch (species.toLowerCase()) {
-            case "leon":
+            case "lion":
                 System.out.print("Length thing: ");
                 double lionTailLength = scanner.nextDouble();
                 scanner.nextLine();
-                newAnimal = new Leon(species, name, favoriteFood, age, entryDate, weight, height, lionTailLength);
-                Leon nuovoLeon = new Leon(species, name, favoriteFood, age, entryDate, weight, height, lionTailLength);
-                leonController.addLeons(nuovoLeon);
+                Lion newLion = new Lion(species, name, favoriteFood, age, entryDate, weight, height, lionTailLength);
+                addLion(newLion);
+                addAnimals(newLion);
                 break;
             case "tiger":
                 System.out.print("Length thing: ");
                 double tigerTailLength = scanner.nextDouble();
                 scanner.nextDouble();
-                newAnimal = new Tiger(species, name, favoriteFood, age, entryDate, weight, height, tigerTailLength);
-                Tiger nuovaTiger = new Tiger(species, name, favoriteFood, age, entryDate, weight, height, tigerTailLength);
-                tigerController.addTigers(nuovaTiger);
+                Tiger newTiger = new Tiger(species, name, favoriteFood, age, entryDate, weight, height, tigerTailLength);
+                addTiger(newTiger);
+                addAnimals(newTiger);
+
                 break;
             case "eagle":
                 System.out.print("Wing width: ");
                 double eagleWingWidth = scanner.nextDouble();
                 scanner.nextDouble();
-                newAnimal = new Eagle(species, name, favoriteFood, age, entryDate, weight, height, eagleWingWidth);
-                Eagle nuovaEagle = new Eagle(species, name, favoriteFood, age, entryDate, weight, height, eagleWingWidth);
-                eagleController.addEagle(nuovaEagle);
+                Eagle newEagle = new Eagle(species, name, favoriteFood, age, entryDate, weight, height, eagleWingWidth);
+                addEagle(newEagle);
+                addAnimals(newEagle);
                 break;
-            default:
-                System.out.println("Species not supported.");
-                return;
         }
 
-        addAnimals(newAnimal);
     }
 
     public void findTallerSpecimen(String species) {
@@ -108,12 +130,11 @@ public class ZooController {
             System.out.println("No " + species + " present in the zoo.");
             return;
         }
-
         Animal specimentTallest = animalSpecies.stream()
                 .max(Comparator.comparingDouble(Animal::getHeight))
                 .orElse(null);
 
-        System.out.println("the " + species + "tallest is" + specimentTallest.getName() +
+        System.out.println("the " + species + " tallest is " + specimentTallest.getName() +
                 " with height " + specimentTallest.getHeight() + "cm");
     }
 
@@ -129,8 +150,8 @@ public class ZooController {
                 .min(Comparator.comparingDouble(Animal::getHeight))
                 .orElse(null);
 
-        System.out.println("The " + species + " lower is" + specimentLower.getName() +
-                "  with height " + specimentLower.getHeight() + "cm");
+        System.out.println("The " + species + " lower is " + specimentLower.getName() +
+                "  with height " + specimentLower.getHeight() + " cm");
     }
 
     public void findHeavierSpecimen(String species) {
@@ -146,7 +167,7 @@ public class ZooController {
                 .orElse(null);
 
         System.out.println("The " + species + " heavier is " + specimentHeavier.getName() +
-                " with weight" + specimentHeavier.getWeight() + "kg");
+                " with weight " + specimentHeavier.getWeight() + " kg");
     }
 
     public void findLighterSpecimen(String species) {
@@ -162,7 +183,29 @@ public class ZooController {
                 .orElse(null);
 
         System.out.println("Il " + species + " lighter is " + specimentLighter.getName() +
-                " with weight " + specimentLighter.getWeight() + "kg");
+                " with weight " + specimentLighter.getWeight() + " kg");
+    }
+
+    public void findLongerTail(String species) {
+        if( species.equalsIgnoreCase("lion")){
+           List<Lion> lionList = getLions();
+           Lion lion= lionList.stream().max(Comparator.comparingDouble(Lion::getTailLength)).orElse(null);
+            System.out.println("the lion with the longest tail is : " + lion.getName() +
+                    " with measure " + lion.getTailLength() + " cm");
+        } else if(species.equalsIgnoreCase("tiger")) {
+            List<Tiger> tigerList = getTigers();
+            Tiger tiger= tigerList.stream().max(Comparator.comparingDouble(Tiger::getTailLength)).orElse(null);
+            System.out.println("the tiger with the longest tail is : " + tiger.getName() +
+                    " with measure " + tiger.getTailLength() + " cm");
+        }
+    }
+    public void findWidestWingWidth(String species) {
+        if( species.equalsIgnoreCase("eagle")){
+            List<Eagle> eagleist = getEagles();
+            Eagle eagle= eagleist.stream().max(Comparator.comparingDouble(Eagle::getWingWidth)).orElse(null);
+            System.out.println("the eagle with the greatest wingspan is : " + eagle.getName() +
+                    " with measure " + eagle.getWingWidth() + " cm");
+        }
     }
 
 

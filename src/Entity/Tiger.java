@@ -1,11 +1,11 @@
 package Entity;
 
+import Interface.IAnimalWithTail;
+
 import java.time.LocalDate;
 
-public class Tiger extends Animal {
+public class Tiger extends Animal implements IAnimalWithTail {
     private double tailLength;
-
-    public Tiger() {}
 
     public Tiger(String species, String name, String favoriteFood, int age, LocalDate entryDate, double weight, double height, double tailLength) {
         super(species, name, favoriteFood, age, entryDate, weight, height);
@@ -33,5 +33,10 @@ public class Tiger extends Animal {
                 ", height=" + getHeight() +
                 ", tail length=" + tailLength +
                 '}';
+    }
+
+    @Override
+    public boolean hasTail() {
+        return true;
     }
 }

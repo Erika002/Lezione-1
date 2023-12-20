@@ -35,8 +35,5 @@ public class Eagle extends Animal implements IAnimalWithWings {
                 '}';
     }
 
-    @Override
-    public boolean hasWings() {
-        return true;
-    }
+
 }

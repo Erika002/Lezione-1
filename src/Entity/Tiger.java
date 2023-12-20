@@ -35,8 +35,5 @@ public class Tiger extends Animal implements IAnimalWithTail {
                 '}';
     }
 
-    @Override
-    public boolean hasTail() {
-        return true;
-    }
+
 }

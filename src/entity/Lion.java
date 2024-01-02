@@ -1,25 +1,27 @@
-package Entity;
+package entity;
 
 import Interface.IAnimalWithTail;
 
 import java.time.LocalDate;
 
-public class Tiger extends Animal implements IAnimalWithTail {
+public class Lion extends Animal implements IAnimalWithTail {
     private double tailLength;
 
-    public Tiger(String species, String name, String favoriteFood, int age, LocalDate entryDate, double weight, double height, double tailLength) {
+
+    public Lion(String species, String name, String favoriteFood, int age, LocalDate entryDate, double weight, double height, double tailLength) {
         super(species, name, favoriteFood, age, entryDate, weight, height);
         this.tailLength = tailLength;
     }
 
+    @Override
     public double getTailLength() {
         return tailLength;
     }
 
+    @Override
     public void setTailLength(double tailLength) {
         this.tailLength = tailLength;
     }
-
 
     @Override
     public String toString() {

@@ -1,4 +1,4 @@
-package Entity;
+package entity;
 
 import Interface.IAnimalWithWings;
 
@@ -13,10 +13,12 @@ public class Eagle extends Animal implements IAnimalWithWings {
         this.wingWidth = wingWidth;
     }
 
+    @Override
     public double getWingWidth() {
         return wingWidth;
     }
 
+    @Override
     public void setWingWidth(double wingWidth) {
         this.wingWidth = wingWidth;
     }

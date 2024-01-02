@@ -1,4 +1,4 @@
-package Entity;
+package entity;
 import java.time.LocalDate;
 public abstract class Animal {
    private String species;

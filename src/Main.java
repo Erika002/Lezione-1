@@ -1,4 +1,4 @@
-import Controller.ZooController;
+import controller.ZooController;
 import Interface.IAnimalWithTail;
 import Interface.IAnimalWithWings;
 
@@ -42,7 +42,6 @@ public class Main {
 
 
 
-        if (insert.equals("-")) {
             System.out.println("Choose a species for your search:");
             System.out.println("1. Lion");
             System.out.println("2. Tiger");
@@ -75,9 +74,13 @@ public class Main {
                 System.out.println("4. Find the lightest specimen among " + species);
                 if (species.equalsIgnoreCase("lion") || species.equalsIgnoreCase("tiger")) {
                     System.out.println("5. Find the specimen with the longest tail");
-                } else if (species.equalsIgnoreCase("eagle")) {
+                } else {
                     System.out.println("5. Find the specimen with the largest wingspan");
                 }
+                System.out.println("6. Find the animal with the longest tail" );
+                System.out.println("7. Find the animal with the widest wingspan" );
+
+
                 System.out.println("0. Exit");
 
                 choice = scanner.nextInt();
@@ -98,13 +101,18 @@ public class Main {
                         break;
                     case 5:
                         if (zooController.getAnimalsBySpecies(species).stream().allMatch(IAnimalWithTail.class::isInstance)) {
-                            zooController.findLongerTail(species);
+                            zooController.findLongestTailOfASpecies(species);
                         } else if (zooController.getAnimalsBySpecies(species).stream().allMatch(IAnimalWithWings.class::isInstance)) {
-                            zooController.findWidestWingWidth(species);
+                            zooController.findWidestWingWidthOfASpecies(species);
                         } else {
                             System.out.println("The selected species does not have tail or wings.");
                         }
                         break;
+                    case 6:
+                        zooController.findLongestTailAcrossAllSpecies();
+                        break;
+                    case 7:
+                        zooController.findWidestWingWidthAcrossAllSpecies();
                     case 0:
                         System.out.println("Exiting the program.");
                         break;
@@ -113,7 +121,7 @@ public class Main {
                         break;
                 }
             } while (choice != 0);
-        }
+
 
         scanner.close();
     }

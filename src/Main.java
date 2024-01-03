@@ -113,6 +113,7 @@ public class Main {
                         break;
                     case 7:
                         zooController.findWidestWingWidthAcrossAllSpecies();
+                        break;
                     case 0:
                         System.out.println("Exiting the program.");
                         break;

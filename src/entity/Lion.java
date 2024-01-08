@@ -1,10 +1,8 @@
 package entity;
 
-import Interface.IAnimalWithTail;
-
 import java.time.LocalDate;
 
-public class Lion extends Animal implements IAnimalWithTail {
+public class Lion extends AnimalWithTail {
     private double tailLength;
 
 

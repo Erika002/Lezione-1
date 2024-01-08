@@ -1,11 +1,16 @@
 import controller.ZooController;
-import Interface.IAnimalWithTail;
-import Interface.IAnimalWithWings;
-
+import entity.AnimalWithTail;
+import entity.AnimalWithWings;
 import java.text.ParseException;
 import java.util.Scanner;
 
 public class Main {
+    enum Species {
+        LION,
+        TIGER,
+        EAGLE
+    }
+
     public static void main(String[] args) throws ParseException {
         Scanner scanner = new Scanner(System.in);
         ZooController zooController = new ZooController();
@@ -21,109 +26,121 @@ public class Main {
             int animalChoice = scanner.nextInt();
             scanner.nextLine();
 
+            Species species = null;
+
             switch (animalChoice) {
                 case 1:
-                    zooController.insertAnimal(scanner, "Lion");
+                    species = Species.LION;
                     break;
                 case 2:
-                    zooController.insertAnimal(scanner, "Tiger");
+                    species = Species.TIGER;
                     break;
                 case 3:
-                    zooController.insertAnimal(scanner, "Eagle");
+                    species = Species.EAGLE;
                     break;
                 default:
                     System.out.println("Invalid choice. Try again.");
                     break;
             }
 
+            assert species != null;
+            zooController.insertAnimal(scanner, species.toString());
+
             System.out.println("To insert a new animal, type '+'. Otherwise, type '-':");
             insert = scanner.nextLine();
         } while (!insert.equals("-"));
 
+        System.out.println("Choose a species for your search:");
+        System.out.println("1. Lion");
+        System.out.println("2. Tiger");
+        System.out.println("3. Eagle");
 
+        int speciesChoice = scanner.nextInt();
+        scanner.nextLine();
 
-            System.out.println("Choose a species for your search:");
-            System.out.println("1. Lion");
-            System.out.println("2. Tiger");
-            System.out.println("3. Eagle");
+        Species selectedSpecies = null;
+        switch (speciesChoice) {
+            case 1:
+                selectedSpecies = Species.LION;
+                break;
+            case 2:
+                selectedSpecies = Species.TIGER;
+                break;
+            case 3:
+                selectedSpecies = Species.EAGLE;
+                break;
+            default:
+                System.out.println("Invalid choice. Exiting the program.");
+                return;
+        }
 
-            int speciesChoice = scanner.nextInt();
+        int choice;
+        do {
+            System.out.println("Choose an option:");
+            System.out.println("1. Find the tallest specimen among " + selectedSpecies);
+            System.out.println("2. Find the lowest specimen among " + selectedSpecies);
+            System.out.println("3. Find the heaviest specimen among " + selectedSpecies);
+            System.out.println("4. Find the lightest specimen among " + selectedSpecies);
+            if (selectedSpecies == Species.LION || selectedSpecies == Species.TIGER) {
+                System.out.println("5. Find the specimen with the longest tail");
+            } else {
+                System.out.println("5. Find the specimen with the largest wingspan");
+            }
+            System.out.println("6. Find the animal with the longest tail");
+            System.out.println("7. Find the animal with the widest wingspan");
+            System.out.println("0. Exit");
+
+            choice = scanner.nextInt();
             scanner.nextLine();
 
-            String species = "";
-            switch (speciesChoice) {
+            switch (choice) {
                 case 1:
-                    species = "Lion";
+                    zooController.findTallerSpecimen(selectedSpecies.toString());
                     break;
                 case 2:
-                    species = "Tiger";
+                    zooController.findLowerSpecimen(selectedSpecies.toString());
                     break;
                 case 3:
-                    species = "Eagle";
+                    zooController.findHeavierSpecimen(selectedSpecies.toString());
+                    break;
+                case 4:
+                    zooController.findLighterSpecimen(selectedSpecies.toString());
+                    break;
+                case 5:
+                    boolean selectedSpeciesHasWithTails = zooController.getAnimalsBySpecies(selectedSpecies.toString()).stream()
+                            .anyMatch(AnimalWithTail.class::isInstance);
+
+                    if (selectedSpeciesHasWithTails) {
+                        zooController.findLongestTailOfASpecies(selectedSpecies.toString());
+                        break;
+                    }
+
+                    boolean selectedSpeciesHasWithWings = zooController.getAnimalsBySpecies(selectedSpecies.toString()).stream()
+                            .anyMatch(AnimalWithWings.class::isInstance);
+
+                    if (selectedSpeciesHasWithWings) {
+                        zooController.findWidestWingWidthOfASpecies(selectedSpecies.toString());
+                        break;
+                    }
+                    System.out.println("The selected species does not have tail or wings.");
+
+                    break;
+                case 6:
+                    zooController.findLongestTailAcrossAllSpecies();
+                    break;
+                case 7:
+                    zooController.findWidestWingWidthAcrossAllSpecies();
+                    break;
+                case 0:
+                    System.out.println("Exiting the program.");
                     break;
                 default:
-                    System.out.println("Invalid choice. Exiting the program.");
-                    return;
+                    System.out.println("Invalid choice. Try again.");
+                    break;
             }
-            int choice;
-            do {
-                System.out.println("Choose an option:");
-                System.out.println("1. Find the tallest specimen among " + species);
-                System.out.println("2. Find the lowest specimen among " + species);
-                System.out.println("3. Find the heaviest specimen among " + species);
-                System.out.println("4. Find the lightest specimen among " + species);
-                if (species.equalsIgnoreCase("lion") || species.equalsIgnoreCase("tiger")) {
-                    System.out.println("5. Find the specimen with the longest tail");
-                } else {
-                    System.out.println("5. Find the specimen with the largest wingspan");
-                }
-                System.out.println("6. Find the animal with the longest tail" );
-                System.out.println("7. Find the animal with the widest wingspan" );
-
-
-                System.out.println("0. Exit");
-
-                choice = scanner.nextInt();
-                scanner.nextLine();
-
-                switch (choice) {
-                    case 1:
-                        zooController.findTallerSpecimen(species);
-                        break;
-                    case 2:
-                        zooController.findLowerSpecimen(species);
-                        break;
-                    case 3:
-                        zooController.findHeavierSpecimen(species);
-                        break;
-                    case 4:
-                        zooController.findLighterSpecimen(species);
-                        break;
-                    case 5:
-                        if (zooController.getAnimalsBySpecies(species).stream().allMatch(IAnimalWithTail.class::isInstance)) {
-                            zooController.findLongestTailOfASpecies(species);
-                        } else if (zooController.getAnimalsBySpecies(species).stream().allMatch(IAnimalWithWings.class::isInstance)) {
-                            zooController.findWidestWingWidthOfASpecies(species);
-                        } else {
-                            System.out.println("The selected species does not have tail or wings.");
-                        }
-                        break;
-                    case 6:
-                        zooController.findLongestTailAcrossAllSpecies();
-                        break;
-                    case 7:
-                        zooController.findWidestWingWidthAcrossAllSpecies();
-                        break;
-                    case 0:
-                        System.out.println("Exiting the program.");
-                        break;
-                    default:
-                        System.out.println("Invalid choice. Try again.");
-                        break;
-                }
-            } while (choice != 0);
-
+        } while (choice != 0);
 
         scanner.close();
+
     }
 }

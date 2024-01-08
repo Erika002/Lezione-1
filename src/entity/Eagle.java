@@ -1,10 +1,8 @@
 package entity;
 
-import Interface.IAnimalWithWings;
-
 import java.time.LocalDate;
 
-public class Eagle extends Animal implements IAnimalWithWings {
+public class Eagle extends AnimalWithWings {
     private double wingWidth;
 
 

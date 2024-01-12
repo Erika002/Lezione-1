@@ -1,7 +1,9 @@
 package entity;
 
-import java.time.LocalDate;
+import Interface.SpeciesInfo;
 
+import java.time.LocalDate;
+@SpeciesInfo(name = "EAGLE")
 public class Eagle extends AnimalWithWings {
     private double wingWidth;
 

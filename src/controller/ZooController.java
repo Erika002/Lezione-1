@@ -1,254 +1,174 @@
 package controller;
+import Interface.SpeciesInfo;
+import Main.Species;
+import Utility.ClassScanner;
+import Utility.InteractionWithTheUser;
 import entity.*;
-
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ZooController {
-
+    InteractionWithTheUser interactionWithTheUser = new InteractionWithTheUser();
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private final Map<Main.Species, List<Animal>> animalMap = new HashMap<>();
+        public ZooController() {
+            initializeSpeciesMap();
+        }
 
-    private final List<Animal> animals;
 
-    private final Map<String, List<Animal>> animalMap = new HashMap<>();
-
-    public ZooController() {
-        this.animals = new ArrayList<>();
-    }
-
-    public List<Animal> getAnimals() {
-        return animals;
-    }
-
-    public List<Animal> getAnimalsBySpecies(String species) {
-        List<Animal> animalSpecies = new ArrayList<>();
-        for (Animal animal : animals) {
-            if (animal.getSpecies().equalsIgnoreCase(species)) {
-                animalSpecies.add(animal);
+    private void initializeSpeciesMap() {
+        Set<Class<?>> speciesClasses = ClassScanner.getClassesWithAnnotation(SpeciesInfo.class, "entity");
+        for (Class<?> speciesClass : speciesClasses) {
+            SpeciesInfo speciesInfo = speciesClass.getAnnotation(SpeciesInfo.class);
+            String speciesName = speciesInfo.name();
+            try {
+                Main.Species speciesEnum = Species.valueOf(speciesName);
+                animalMap.put(speciesEnum, new ArrayList<>());
+            } catch (IllegalArgumentException e) {
+                interactionWithTheUser.errorMessage(speciesName);
+                System.exit(1);
             }
         }
-        return animalSpecies;
     }
 
 
-
-    public void insertAnimal(Scanner scanner, String species) {
-        System.out.println("Enter the details of the new one " + species + ":");
-
-        System.out.print("name: ");
-        String name = scanner.nextLine();
-
-        System.out.print("Favorite food: ");
-        String favoriteFood = scanner.nextLine();
-
-        System.out.print("Age: ");
-        int age = scanner.nextInt();
-
-        System.out.print("Weight: ");
-        double weight = scanner.nextDouble();
-
-        System.out.print("Height: ");
-        double height = scanner.nextDouble();
-        scanner.nextLine();
-
-        System.out.println("Date of entry into the zoo (format dd-MM-yyyy): ");
-        String date = scanner.nextLine();
-        System.out.println(date + "date");
-        LocalDate entryDate = LocalDate.parse(date, dateFormatter);
-
-        switch (species.toLowerCase()) {
-            case "lion":
-                System.out.print("Length thing: ");
-                double lionTailLength = scanner.nextDouble();
-                scanner.nextLine();
-                Lion newLion = new Lion(species, name, favoriteFood, age, entryDate, weight, height, lionTailLength);
-                animals.add(newLion);
-                animalMap.computeIfAbsent(species, k -> new ArrayList<>()).add(newLion);
-                break;
-            case "tiger":
-                System.out.print("Length thing: ");
-                double tigerTailLength = scanner.nextDouble();
-                scanner.nextLine();
-                Tiger newTiger = new Tiger(species, name, favoriteFood, age, entryDate, weight, height, tigerTailLength);
-                animals.add(newTiger);
-                animalMap.computeIfAbsent(species, k -> new ArrayList<>()).add(newTiger);
-                break;
-            case "eagle":
-                System.out.print("Wing width: ");
-                double eagleWingWidth = scanner.nextDouble();
-                scanner.nextLine();
-                Eagle newEagle = new Eagle(species, name, favoriteFood, age, entryDate, weight, height, eagleWingWidth);
-                animals.add(newEagle);
-                animalMap.computeIfAbsent(species, k -> new ArrayList<>()).add(newEagle);
-                break;
-            default:
-                System.out.println("Unrecognized species. Please enter a valid species.");
+    public void insertAnimal(Species species) {
+            interactionWithTheUser.printMessage(species);
+            String name = interactionWithTheUser.insertString("name: ");
+            String favoriteFood = interactionWithTheUser.insertString("Favorite food: ");
+            int age = interactionWithTheUser.insertInt("Age: ");
+            double weight = interactionWithTheUser.insertDouble("Weight: ");
+            double height = interactionWithTheUser.insertDouble("Height: ");
+            String date = interactionWithTheUser.insertString("Date of entry into the zoo (format dd-MM-yyyy): ");
+            LocalDate entryDate = LocalDate.parse(date, dateFormatter);
+            switch (species) {
+                case LION:
+                    double lionTailLength = interactionWithTheUser.insertDouble("Length of tail: ");
+                    Lion newLion = new Lion(species.toString(), name, favoriteFood, age, entryDate, weight, height, lionTailLength);
+                    animalMap.computeIfAbsent(species, k -> new ArrayList<>()).add(newLion);
+                    break;
+                case TIGER:
+                    double tigerTailLength = interactionWithTheUser.insertDouble("Length of tail: ");
+                    Tiger newTiger = new Tiger(species.toString(), name, favoriteFood, age, entryDate, weight, height, tigerTailLength);
+                    animalMap.computeIfAbsent(species, k -> new ArrayList<>()).add(newTiger);
+                    break;
+                case EAGLE:
+                    double eagleWingWidth = interactionWithTheUser.insertDouble("Wing width: ");
+                    Eagle newEagle = new Eagle(species.toString(), name, favoriteFood, age, entryDate, weight, height, eagleWingWidth);
+                    animalMap.computeIfAbsent(species, k -> new ArrayList<>()).add(newEagle);
+                    break;
+                default:
+                    interactionWithTheUser.printMessageDefault();
+            }
         }
+
+        public List<Animal> getAnimalMapBySpecies(Species species) {
+            return animalMap.getOrDefault(species, Collections.emptyList());
+        }
+
+
+        public void findTallerSpecimen(Species species) {
+            List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
+            if (animalSpeciesList.isEmpty()) {
+                interactionWithTheUser.printMessageSpeciesNotFound(species);
+            }
+            animalSpeciesList.stream()
+                    .max(Comparator.comparingDouble(Animal::getHeight))
+                    .ifPresent(specimenTallest -> interactionWithTheUser.messageFindTallerSpecimen(species, specimenTallest));
+        }
+
+
+        public void findLowerSpecimen(Species species) {
+            List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
+
+            if (animalSpeciesList.isEmpty()) {
+                interactionWithTheUser.printMessageSpeciesNotFound(species);
+            }
+
+            animalSpeciesList.stream()
+                    .min(Comparator.comparingDouble(Animal::getHeight))
+                    .ifPresent(specimenLower -> interactionWithTheUser.messageFindLowerSpecimen(species, specimenLower));
+
+        }
+        public void findHeaviestSpecimen(Species species) {
+            List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
+
+            if (animalSpeciesList.isEmpty()) {
+                interactionWithTheUser.printMessageSpeciesNotFound(species);
+            }
+            animalSpeciesList.stream()
+                    .max(Comparator.comparingDouble(Animal::getWeight))
+                   .ifPresent(heaviestSpecimen -> interactionWithTheUser.messageFindHeavierSpecimen(species, heaviestSpecimen));
+        }
+
+        public void findLightestSpecimen(Species species) {
+            List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
+
+            if (animalSpeciesList.isEmpty()) {
+                interactionWithTheUser.printMessageSpeciesNotFound(species);
+            }
+            animalSpeciesList.stream()
+                    .min(Comparator.comparingDouble(Animal::getWeight))
+                    .ifPresent(specimenLighter -> interactionWithTheUser.messageFindLighterSpecimen(species, specimenLighter));
+        }
+
+
+        public void findLongestTailOfASpecies(Species species) {
+            List<Animal> animalSpeciesMap = getAnimalMapBySpecies(species);
+            if (animalSpeciesMap.isEmpty()) {
+                interactionWithTheUser.printMessageSpeciesNotFound(species);
+            }
+            Animal longestTailAnimal = animalSpeciesMap.stream()
+                    .filter(AnimalWithTail.class::isInstance)
+                    .max(Comparator.comparingDouble(animal -> ((AnimalWithTail) animal).getTailLength()))
+                    .orElse(null);
+
+            interactionWithTheUser.messageFindLongestTailOfASpecies(species, longestTailAnimal);
+        }
+
+        public void findWidestWingWidthOfASpecies(Species species) {
+            List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
+            if (animalSpeciesList.isEmpty()) {
+                interactionWithTheUser.printMessageSpeciesNotFound(species);
+            }
+            Animal widestWingWidthAnimal = animalSpeciesList.stream()
+                    .filter(AnimalWithWings.class::isInstance)
+                    .max(Comparator.comparingDouble(animal -> ((AnimalWithWings) animal).getWingWidth()))
+                    .orElse(null);
+            interactionWithTheUser.messageFindWidestWingWidthOfASpecies(species, widestWingWidthAnimal);
+        }
+
+
+        public void findWidestWingWidthAcrossAllSpecies() {
+            List<AnimalWithWings> animalsWithWings =
+                    animalMap.values().stream().flatMap(Collection::stream)
+                            .filter(AnimalWithWings.class::isInstance)
+                            .map(AnimalWithWings.class::cast)
+                            .toList();
+
+            if (animalsWithWings.isEmpty()) {
+                interactionWithTheUser.messageNoAnimalsWithWing();
+            }
+
+            animalsWithWings.stream()
+                    .max(Comparator.comparingDouble(AnimalWithWings::getWingWidth))
+                    .ifPresent(widestWingWidthAnimal -> interactionWithTheUser.messageAllAnimalsWithWing(widestWingWidthAnimal));
+        }
+
+        public void findLongestTailAcrossAllSpecies() {
+            List<AnimalWithTail> animalsWithTail =
+                    animalMap.values().stream().flatMap(Collection::stream)
+                            .filter(AnimalWithTail.class::isInstance)
+                            .map(AnimalWithTail.class::cast)
+                            .toList();
+            if (animalsWithTail.isEmpty()) {
+                interactionWithTheUser.messageNoAnimalsWithTail();
+            }
+            animalsWithTail.stream()
+                    .max(Comparator.comparingDouble(AnimalWithTail::getTailLength))
+                    .ifPresent(longestTailAnimal -> interactionWithTheUser.messageAllAnimalsWithTail(longestTailAnimal));
+        }
+
+
     }
-    private List<Animal> getAnimalMapBySpecies(String species) {
-        return animalMap.getOrDefault(species, Collections.emptyList());
-    }
-
-
-    public void findTallerSpecimen(String species) {
-        List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
-        if (animalSpeciesList.isEmpty()) {
-            System.out.println("No " + species + " present in the zoo.");
-            return;
-        }
-        Animal specimenTallest = animalSpeciesList.stream()
-                .max(Comparator.comparingDouble(Animal::getHeight))
-                .orElse(null);
-
-            System.out.println("The " + species + " tallest is " + specimenTallest.getName() +
-                    " with height " + specimenTallest.getHeight() + "cm");
-
-    }
-
-
-
-    public void findLowerSpecimen(String species) {
-        List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
-
-        if (animalSpeciesList.isEmpty()) {
-            System.out.println("No " + species + " present in the zoo.");
-            return;
-        }
-
-        Animal specimenLower = animalSpeciesList.stream()
-                .min(Comparator.comparingDouble(Animal::getHeight))
-                .orElse(null);
-
-            System.out.println("The " + species + " lower is " + specimenLower.getName() +
-                    " with height " + specimenLower.getHeight() + "cm");
-
-    }
-
-
-    public void findHeavierSpecimen(String species) {
-        List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
-
-        if (animalSpeciesList.isEmpty()) {
-            System.out.println("No " + species + " present in the zoo.");
-            return;
-        }
-
-        Animal specimenHeavier = animalSpeciesList.stream()
-                .max(Comparator.comparingDouble(Animal::getWeight))
-                .orElse(null);
-
-            System.out.println("The " + species + " heavier is " + specimenHeavier.getName() +
-                    " with weight " + specimenHeavier.getWeight() + "kg");
-    }
-
-
-    public void findLighterSpecimen(String species) {
-        List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
-
-        if (animalSpeciesList.isEmpty()) {
-            System.out.println("No " + species + " present in the zoo.");
-            return;
-        }
-
-        Animal specimenLighter = animalSpeciesList.stream()
-                .min(Comparator.comparingDouble(Animal::getWeight))
-                .orElse(null);
-
-            System.out.println("The " + species + " lighter is " + specimenLighter.getName() +
-                    " with weight " + specimenLighter.getWeight() + "kg");
-    }
-
-
-    public void findLongestTailOfASpecies(String species) {
-        List<Animal> animalSpeciesMap = getAnimalMapBySpecies(species);
-
-        if (animalSpeciesMap.isEmpty()) {
-            System.out.println("No " + species + " present in the zoo.");
-            return;
-        }
-
-        Animal longestTailAnimal = animalSpeciesMap.stream()
-                .filter(AnimalWithTail.class::isInstance)
-                .max(Comparator.comparingDouble(animal -> ((AnimalWithTail) animal).getTailLength()))
-                .orElse(null);
-
-        if (longestTailAnimal != null) {
-            System.out.println("The " + species + " with the longest tail is: " +
-                    longestTailAnimal.getName() + " with measure " +
-                    ((AnimalWithTail) longestTailAnimal).getTailLength() + " cm");
-        } else {
-            System.out.println("No " + species + " with a tail present in the zoo.");
-        }
-    }
-
-    public void findWidestWingWidthOfASpecies(String species) {
-        List<Animal> animalSpeciesList = getAnimalMapBySpecies(species);
-
-        if (animalSpeciesList.isEmpty()) {
-            System.out.println("No " + species + " present in the zoo.");
-            return;
-        }
-
-        Animal widestWingWidthAnimal = animalSpeciesList.stream()
-                .filter(AnimalWithWings.class::isInstance)
-                .max(Comparator.comparingDouble(animal -> ((AnimalWithWings) animal).getWingWidth()))
-                .orElse(null);
-
-        if (widestWingWidthAnimal != null) {
-            System.out.println("The " + species + " with the widest wingspan is: " +
-                    widestWingWidthAnimal.getName() + " with measure " +
-                    ((AnimalWithWings) widestWingWidthAnimal).getWingWidth() + " cm");
-        } else {
-            System.out.println("No " + species + " with wings present in the zoo.");
-        }
-    }
-
-
-    public void findWidestWingWidthAcrossAllSpecies() {
-        List<AnimalWithWings> animalsWithWings = getAnimals().stream()
-                .filter(AnimalWithWings.class::isInstance)
-                .map(AnimalWithWings.class::cast)
-                .toList();
-
-        if (animalsWithWings.isEmpty()) {
-            System.out.println("No animals with wings present in the zoo.");
-            return;
-        }
-
-        AnimalWithWings widestWingWidthAnimal = animalsWithWings.stream()
-                .max(Comparator.comparingDouble(AnimalWithWings::getWingWidth))
-                .orElse(null);
-
-            System.out.println("The animal with the widest wingspan is: " +
-                    widestWingWidthAnimal.getName() + " of species " + widestWingWidthAnimal.getSpecies() +
-                    " with measure " + widestWingWidthAnimal.getWingWidth() + " cm");
-    }
-
-    public void findLongestTailAcrossAllSpecies() {
-        List<AnimalWithTail> animalsWithTail = getAnimals().stream()
-                .filter(AnimalWithTail.class::isInstance)
-                .map(AnimalWithTail.class::cast)
-                .toList();
-
-        if (animalsWithTail.isEmpty()) {
-            System.out.println("No animals with tail present in the zoo.");
-            return;
-        }
-
-        AnimalWithTail longestTailAnimal = animalsWithTail.stream()
-                .max(Comparator.comparingDouble(AnimalWithTail::getTailLength))
-                .orElse(null);
-
-            System.out.println("The animal with the longest tail is: " +
-                    longestTailAnimal.getName() + " of species " + longestTailAnimal.getSpecies() +
-                    " with measure " + longestTailAnimal.getTailLength() + " cm");
-    }
-
-
-
-
-
-
-}
